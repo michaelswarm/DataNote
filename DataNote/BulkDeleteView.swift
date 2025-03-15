@@ -10,7 +10,7 @@ import SwiftData
 
 struct BulkDeleteView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(ExportModel.self) var exportModel
+    @Environment(ExportModel.self) var exportModel // If environment, then why init parameter???
     //@Environment(ImportModel.self) var importModel
     //@Environment(DeleteModel.self) var deleteModel
     @State private var showingConfirmation = false
@@ -23,9 +23,9 @@ struct BulkDeleteView: View {
     }
 
     var body: some View {
-        if shared.isRunning {
+        /*if shared.isRunning {
             ProgressBar(progress: $shared.progress) // ProgressView + ProgressModel wrapper
-        } else {
+        } else {*/
             Button(role: .destructive) {
                 showingConfirmation = true
             } label: {
@@ -44,7 +44,7 @@ struct BulkDeleteView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-        }
+        //}
     }    
 }
 

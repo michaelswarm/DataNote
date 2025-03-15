@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 
 struct BulkExportView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(ExportModel.self) var exportModel
+    @Environment(ExportModel.self) var exportModel // If environment, then why init parameter???
     //@Environment(ImportModel.self) var importModel
     //@Environment(DeleteModel.self) var deleteModel
     @State private var isShowingFolderPicker = false
@@ -22,16 +22,16 @@ struct BulkExportView: View {
     }
     
     var body: some View {
-        VStack {
-            if shared.isRunning {
+        //VStack {
+            /*if shared.isRunning {
                 ProgressBar(progress: $shared.progress) // ProgressView + ProgressModel wrapper
-            } else {
+            } else {*/
                 Button {
                     isShowingFolderPicker = true
                 } label: {
                     Label("Export All", systemImage: "square.and.arrow.up.on.square")
                 }
-                //.disabled(importModel.isRunning || deleteModel.isRunning)
+                .disabled(exportModel.isRunning)
                 // File importer is used as folder picker for user to select a destination folder to export to.
                 .fileImporter( isPresented: $isShowingFolderPicker, allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
                     print("Folder Picker...")
@@ -50,8 +50,8 @@ struct BulkExportView: View {
                     print("Export All Cancel...")
                 }
                 .fileDialogConfirmationLabel("Export All") // MacOS
-            }
-        }
+            //}
+        //}
     }
 }
 

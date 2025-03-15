@@ -12,6 +12,7 @@ import SwiftData
 struct DataNoteApp: App {
     @State var sortOption: SortOption = .titleAZ
     @State var config = StorageConfiguration()
+    @State var selection: Note?
     
     var modelContext: ModelContext {
         sharedModelContainer.mainContext
@@ -44,7 +45,7 @@ struct DataNoteApp: App {
         let exportModel = ExportModel(modelContext: modelContext) // Create shared model here
 
         WindowGroup {
-            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config)
+            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection)
                 .modelContainer(for: Note.self)
                 .environment(exportModel)
         }
@@ -53,22 +54,25 @@ struct DataNoteApp: App {
         .commands {
             CommandGroup(after: .newItem) {
                 Divider() // Separate import and export from other file menu items
-                /*if config.showImportAll {
+                if config.showImportAll {
+                    /*if exportModel.isRunning  { // No way to tell which process is running???
+                        ProgressBar(progress: exportModel.progress) // Need binding here, which BulkImportView helps create.
+                    }*/
                     BulkImportView(sharedModel: exportModel)
                     // Pass all bulk storage action models into environment for button enable-disable
                         .environment(exportModel)
-                }*/
+                }
                 if config.showExportAll {
                     BulkExportView(sharedModel: exportModel) // Pass into file menu item button
                     // Pass all bulk storage action models into environment for button enable-disable
                         .environment(exportModel)
                 }
                 Divider() // Separate delete to make it less likely to be accidentally chosen.
-                /*if config.showDeleteAll {
-                    BulkDeleteView(sharedModel: exportModel, selection: $main.selection)
+                if config.showDeleteAll {
+                    BulkDeleteView(sharedModel: exportModel, selection: $selection)
                     // Pass all bulk storage action models into environment for button enable-disable
                         .environment(exportModel)
-                }*/
+                }
             }
         }
 #endif

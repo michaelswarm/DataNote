@@ -12,15 +12,16 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var notes: [Note]
-    @State private var selectedNote: Note?
+    @Binding private var selectedNote: Note?
     @Binding var sortOption: SortOption
     @Bindable var config: StorageConfiguration // = StorageConfiguration()
     
     // The sortDescriptor value is passed separately from sortOption binding, so that re-init and re-query whenever sort descriptor changes. A sortOption change just re-calculates the body (sidebar).
-    init(sortDescriptor: SortDescriptor<Note>, sortOption: Binding<SortOption>, config: StorageConfiguration) {
+    init(sortDescriptor: SortDescriptor<Note>, sortOption: Binding<SortOption>, config: StorageConfiguration, selection: Binding<Note?>) {
         self._notes = Query(sort: [sortDescriptor]) // Query with sort descriptor
         self._sortOption = sortOption
         self.config = config
+        self._selectedNote = selection
     }
 
     var body: some View {
@@ -77,5 +78,6 @@ struct ContentView: View {
 #Preview {
     @Previewable @State var sortOption = SortOption.titleAZ
     @Previewable @State var config: StorageConfiguration = StorageConfiguration()
-    ContentView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config)
+    @Previewable @State var selection: Note? = nil
+    ContentView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection)
 }
