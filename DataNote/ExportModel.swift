@@ -195,4 +195,64 @@ class ExportModel {
         progress.completed += 1
         progress.message = "Deleting \(progress.formattedCompletedOfTotal), time remaining \(progress.formattedRemainingTime)" // Display by ProgressView
     }
+    
+    // MARK: SEARCH
+    // var searchText: String = ""
+    var results: [Note] = []
+    
+    func searchAllNotes(titleText searchText: String) async {
+        print("SearchAllNotes for \(searchText)...")
+                results = []
+        isRunning = true
+        progress = ProgressModel()
+        progress.message = "Preparing title search..."
+
+        if let notes = try? fetchRecords(predicate: #Predicate<Note> { record in record.title.localizedStandardContains(searchText) }, sortDescriptors: [SortDescriptor(\.title)]) {
+            print("Notes \(notes.count)")
+            results = notes
+            progress.total = results.count
+        }
+
+        progress.message = "Title search complete!"
+        isRunning = false
+    }
+
+    func searchAllNotes(contentText searchText: String) async {
+        print("SearchAllNotes for \(searchText)...")
+        //results = []
+        isRunning = true
+        progress = ProgressModel()
+        progress.message = "Preparing content search..."
+                
+        var notes = [Note]()
+        // Notice that title search might be handled by a predicate?
+        // { record.title.lowercase.contains(searchText.lowercase) }
+        if let records = try? fetchRecords(predicate: #Predicate<Note> { record in true }, sortDescriptors: [SortDescriptor(\.title)]) {
+            notes = records
+            progress.total = notes.count
+        }
+        
+        for note in notes {
+            if await matchNote(note, searchText: searchText) {
+                results.append(note)
+            }
+        }
+        progress.message = "Conent search complete!"
+        isRunning = false
+    }
+    
+    private func matchNote(_ note: Note, searchText: String) async -> Bool {
+        var result: Bool = false
+        result = note.content.lowercased().contains(searchText) // Don't care how many match, nor case, nor whole word.
+        // Artificially slow operation, to visualize for debug and testing progress view. Slow for animation?
+        // try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds (Too fast to debug-test for small counts.)
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds (??? to debug-test for small counts.)
+        // try? await Task.sleep(nanoseconds: 1_000_000_000) // 1.0 seconds (Good to debug-test small counts.)
+
+        // Progress Update
+        progress.completed += 1
+        progress.message = "Searching \(progress.formattedCompletedOfTotal), time remaining \(progress.formattedRemainingTime)" // Display by ProgressView
+        
+        return result
+    }
 }
