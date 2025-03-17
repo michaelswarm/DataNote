@@ -1,0 +1,15 @@
+{
+  "originHash" : "f4e3d6842a06a6d32ca4aa9581b79e364259a5164806b153bad60e5d7f90d3c9",
+  "pins" : [
+    {
+      "identity" : "wikieditor",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/michaelswarm/WikiEditor.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "ab3d1e995466316e5eff5475ad5224c4710b9fd6"
+      }
+    }
+  ],
+  "version" : 3
+}

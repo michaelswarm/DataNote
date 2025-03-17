@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		88513CAB2D834D100079EDA9 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 88513CAA2D834D100079EDA9 /* README.md */; };
+		88513DCA2D886B430079EDA9 /* WikiEditor in Frameworks */ = {isa = PBXBuildFile; productRef = 88513DC92D886B430079EDA9 /* WikiEditor */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88513DCA2D886B430079EDA9 /* WikiEditor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			);
 			name = DataNote;
 			packageProductDependencies = (
+				88513DC92D886B430079EDA9 /* WikiEditor */,
 			);
 			productName = DataNote;
 			productReference = 88513C782D833DD70079EDA9 /* DataNote.app */;
@@ -201,6 +204,9 @@
 			);
 			mainGroup = 88513C6F2D833DD70079EDA9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				88513DC82D886B430079EDA9 /* XCRemoteSwiftPackageReference "WikiEditor" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 88513C792D833DD70079EDA9 /* Products */;
 			projectDirPath = "";
@@ -598,6 +604,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		88513DC82D886B430079EDA9 /* XCRemoteSwiftPackageReference "WikiEditor" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/michaelswarm/WikiEditor.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		88513DC92D886B430079EDA9 /* WikiEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 88513DC82D886B430079EDA9 /* XCRemoteSwiftPackageReference "WikiEditor" */;
+			productName = WikiEditor;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 88513C702D833DD70079EDA9 /* Project object */;
 }
