@@ -7,12 +7,13 @@
 
 import SwiftUI
 import SwiftData
+import WikiEditor
 
 // MainView
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var notes: [Note]
-    @Binding private var selectedNote: Note?
+    @Binding var selectedNote: Note? // Binding or Bindable???
     @Binding var sortOption: SortOption
     @Bindable var config: StorageConfiguration // = StorageConfiguration()
 
@@ -22,9 +23,10 @@ struct ContentView: View {
     @State var searchType: SearchType = .title
     @Environment(ExportModel.self) var bulkModel
     
-    // Wiki Model (depends of query, update? performance-scale?) Can model update be driven by view on change??? 
-    @State var selectedTitle: String?
-    @State var contentSelection: String? // TBD: Optionally used for add title or scroll to content selection...
+    @State var wiki: WikiModel
+    // Wiki Model (depends of query, update? performance-scale?) Can model update be driven by view on change???
+    /*@State var selectedTitle: String?
+    @State var contentSelection: NSRange = NSRange(location: 0,length: 0) // TBD: Optionally used for add title or scroll to content selection...
     var titles: [String] { notes.map(\.title) }
     var titlesExcludingSelf: [String] {
         if let selectedTitle = selectedTitle {
@@ -41,24 +43,27 @@ struct ContentView: View {
     var titlesExcludingSelfSorted: [String] {
         titlesExcludingSelf.sorted { $0.count < $1.count }
     }
+    @State var titlesNotSelfSorted: [String] = [] // Pass to WikiEditor. Must be updated, along with selectedTitle.
     func resolveNote(from title: String?) -> Note? {
         guard let title = title else { return nil }
         
-        if let index = notes.firstIndex { $0.title == title } {
+        if let index = notes.firstIndex(where: { $0.title == title }) {
             let note = notes[index]
             return note
         } else {
             print("ResolveNote: Can not find index...")
             return nil
         }
-    }
+    }*/
 
     // The sortDescriptor value is passed separately from sortOption binding, so that re-init and re-query whenever sort descriptor changes. A sortOption change just re-calculates the body (sidebar).
-    init(sortDescriptor: SortDescriptor<Note>, sortOption: Binding<SortOption>, config: StorageConfiguration, selection: Binding<Note?>) {
+    init(sortDescriptor: SortDescriptor<Note>, sortOption: Binding<SortOption>, config: StorageConfiguration, selection: Binding<Note?>, context: ModelContext) {
         self._notes = Query(sort: [sortDescriptor]) // Query with sort descriptor
         self._sortOption = sortOption
         self.config = config
         self._selectedNote = selection
+        
+        self.wiki = WikiModel(modelContext: context)
     }
 
     var body: some View {
@@ -89,6 +94,11 @@ struct ContentView: View {
                         }
                     }
                 }
+                // Calculate because of note selection
+                    .onChange(of: selectedNote) { oldValue, newValue in
+                        print("On change selected note...") // Avoid trigger based on changes to note content???
+                        wiki.contentSelection = NSRange(location: 0, length: 0) // Start edit at top, not bottom. 
+                    }
                 
                 // count needs to adjust
                 ActionBar(sortOption: $sortOption, config: config, count: searchText.isEmpty ? notes.count : bulkModel.results.count, selection: $selectedNote)
@@ -117,25 +127,9 @@ struct ContentView: View {
 #endif
         } detail: {
             if let selectedNote = selectedNote {
-                NoteDetailView(note: selectedNote)
-                
-                // Wiki: Can not be in model unless model can query and update notes. Workaround use view on change.
-                    .onChange(of: selectedTitle) { oldValue, newValue in
-                        // Resolve title to note
-                        self.selectedNote = resolveNote(from: newValue) // After update, before value changes.
-                    }
-                /*let noteTitle = Binding(
-                    get: { note.title },
-                    set: { note.update(keyPath: \.title, to: $0) }
-                )*/
-                let noteContent = Binding(
-                    get: { selectedNote.content },
-                    set: { selectedNote.update(keyPath: \.content, to: $0) }
-                )
-                // WikiEditor here...
-                // WikiEditor(text: noteContent, title: $selectedTitle, titlesShortestFirstExcludingSelf: titlesExcludingSelfSorted, selection: $contentSelection)
+                Detail(wiki: wiki, note: selectedNote, selectedNote: $selectedNote, titlesNotSelfSorted: wiki.titlesNotSelfSorted) // Can even move this up one level, since Detail handles selected note optional. Detail needs to write to selected note.
+                // NoteDetailView(note: selectedNote)
 
-                
             } else {
                 Text("Select a note")
             }
@@ -146,6 +140,7 @@ struct ContentView: View {
         let newNote = Note()
         modelContext.insert(newNote)
         selectedNote = newNote
+        wiki.updateTitles()
     }
 
     private func deleteNotes(offsets: IndexSet) {
@@ -153,6 +148,7 @@ struct ContentView: View {
             offsets.map { notes[$0] }.forEach(modelContext.delete)
             selectedNote = nil
         }
+        wiki.updateTitles()
     }
 }
 
@@ -160,5 +156,6 @@ struct ContentView: View {
     @Previewable @State var sortOption = SortOption.titleAZ
     @Previewable @State var config: StorageConfiguration = StorageConfiguration()
     @Previewable @State var selection: Note? = nil
-    ContentView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection)
+    let context = ModelContainer.shared.mainContext
+    ContentView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection, context: context)
 }

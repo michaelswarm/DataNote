@@ -45,7 +45,7 @@ struct DataNoteApp: App {
         let exportModel = ExportModel(modelContext: modelContext) // Create shared model here
 
         WindowGroup {
-            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection)
+            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection, context: modelContext)
                 .modelContainer(for: Note.self)
                 .environment(exportModel)
         }
