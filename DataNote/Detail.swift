@@ -17,12 +17,18 @@ struct Detail: View {
     
     @State var titleEdit: String // View state does not change on change to bindable.
     init(wiki: WikiModel, note: Note, selectedNote: Binding<Note?>, titlesNotSelfSorted: [String]) {
+        print("Detail init...")
         self.wiki = wiki
         self.note = note
         self._selectedNote = selectedNote
-        self.titlesNotSelfSorted = titlesNotSelfSorted
-        
+        self.titlesNotSelfSorted = titlesNotSelfSorted // Used as parameter to WikiEditor
         self.titleEdit = note.title
+        
+        print("Detail titles count \(titlesNotSelfSorted.count)...")
+        print("Detail wiki titles count \(wiki.titlesNotSelfSorted.count)...")
+        
+        // Do not update wiki from within Detail.init, because it causes infinite loop...
+        // self.wiki.exclude(title: note.title) // Recalculates titlesNotSelfSorted to exclude self... (CAUSES CRASH, even if not used)
     }
     
     var body: some View {
@@ -31,6 +37,7 @@ struct Detail: View {
             VStack(spacing: 0) {
                 TextField("Title", text: $titleEdit)
                     .onSubmit {
+                        print("On submit...")
                         // rename
                         selectedNote.title = titleEdit
                         selectedNote.modifiedNow() // Update modified with title modification.

@@ -12,7 +12,17 @@ import SwiftData
 class WikiModel {
     let modelContext: ModelContext
     var notes: [Note] = []
-
+    
+    // Move selection into wiki model, so property observer can exclude title. 
+    var selection: Note? { // Move into wiki model???
+        didSet {
+            print("WikiModel selection did set...")
+            if let selection = selection {
+                exclude(title: selection.title)
+            }
+            contentSelection = NSRange(location: 0, length: 0) // Start edit at top, not bottom.
+        }
+    }
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         // Constant and not integrated with add-delete-rename. 
@@ -78,6 +88,20 @@ class WikiModel {
         if let records = try? fetchRecords(predicate: #Predicate<Note> { record in true }, sortDescriptors: [SortDescriptor(\.title)]) {
             notes = records
             titlesNotSelfSorted = titles.sorted()
+        }
+    }
+    func exclude(title: String) {
+        let titles = notes.map(\.title)
+        var set = Set(titles)
+        print("Titles count \(set.count)...")
+        if let _ = set.remove(title) {
+            print("Remove title \(title)...")
+            let titlesNotSelf = Array(set)
+            let titlesNotSelfSorted = titlesNotSelf.sorted { $0.count < $1.count }
+            self.titlesNotSelfSorted = titlesNotSelfSorted
+            print("Titles not self count \(self.titlesNotSelfSorted.count)...")
+        } else {
+            print("Not found \(title) in titles...")
         }
     }
 }

@@ -22,8 +22,9 @@ struct ContentView: View {
     @State var isExpanded = false
     @State var searchType: SearchType = .title
     @Environment(ExportModel.self) var bulkModel
+    @Environment(WikiModel.self) var wiki // Replace local wiki with app wiki
     
-    @State var wiki: WikiModel
+    // @State var wiki: WikiModel
     // Wiki Model (depends of query, update? performance-scale?) Can model update be driven by view on change???
     /*@State var selectedTitle: String?
     @State var contentSelection: NSRange = NSRange(location: 0,length: 0) // TBD: Optionally used for add title or scroll to content selection...
@@ -63,7 +64,7 @@ struct ContentView: View {
         self.config = config
         self._selectedNote = selection
         
-        self.wiki = WikiModel(modelContext: context)
+        // self.wiki = WikiModel(modelContext: context)
     }
 
     var body: some View {
@@ -96,8 +97,8 @@ struct ContentView: View {
                 }
                 // Calculate because of note selection
                     .onChange(of: selectedNote) { oldValue, newValue in
-                        print("On change selected note...") // Avoid trigger based on changes to note content???
-                        wiki.contentSelection = NSRange(location: 0, length: 0) // Start edit at top, not bottom. 
+                        print("List on change selected note...") // Avoid trigger based on changes to note content???
+                        // wiki.contentSelection = NSRange(location: 0, length: 0) // Start edit at top, not bottom. 
                     }
                 
                 // count needs to adjust

@@ -12,7 +12,7 @@ import SwiftData
 struct DataNoteApp: App {
     @State var sortOption: SortOption = .titleAZ
     @State var config = StorageConfiguration()
-    @State var selection: Note?
+    // @State var selection: Note? // Move into wiki model???
     
     var modelContext: ModelContext {
         sharedModelContainer.mainContext
@@ -43,11 +43,13 @@ struct DataNoteApp: App {
 
     var body: some Scene {
         let exportModel = ExportModel(modelContext: modelContext) // Create shared model here
+        @Bindable var wiki = WikiModel(modelContext: modelContext) // Has property observer, can still pass as parameter...
 
         WindowGroup {
-            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection, context: modelContext)
+            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $wiki.selection, context: modelContext)
                 .modelContainer(for: Note.self)
-                .environment(exportModel)
+                .environment(exportModel) 
+                .environment(wiki)
         }
         
 #if os(macOS)
@@ -69,7 +71,7 @@ struct DataNoteApp: App {
                 }
                 Divider() // Separate delete to make it less likely to be accidentally chosen.
                 if config.showDeleteAll {
-                    BulkDeleteView(sharedModel: exportModel, selection: $selection)
+                    BulkDeleteView(sharedModel: exportModel, selection: $wiki.selection)
                     // Pass all bulk storage action models into environment for button enable-disable
                         .environment(exportModel)
                 }
