@@ -26,6 +26,7 @@ struct Detail: View {
         
         print("Detail titles count \(titlesNotSelfSorted.count)...")
         print("Detail wiki titles count \(wiki.titlesNotSelfSorted.count)...")
+        print("Detail wiki titles \(wiki.titles)")
         
         // Do not update wiki from within Detail.init, because it causes infinite loop...
         // self.wiki.exclude(title: note.title) // Recalculates titlesNotSelfSorted to exclude self... (CAUSES CRASH, even if not used)
@@ -39,9 +40,11 @@ struct Detail: View {
                     .onSubmit {
                         print("On submit...")
                         // rename
-                        selectedNote.title = titleEdit
+                        let newTitle = titleEdit
+                        selectedNote.title = newTitle
                         selectedNote.modifiedNow() // Update modified with title modification.
-                        wiki.updateTitles()
+                        wiki.updateTitles() // This should update titles, but not for currrent detail view???
+                        wiki.exclude(title: newTitle)
                     }
                     .padding(.horizontal, 2) // Horizontal padding to match TextEditor internal horizontal padding for visual space.
                 

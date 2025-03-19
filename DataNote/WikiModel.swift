@@ -70,6 +70,7 @@ class WikiModel {
     var titlesExcludingSelfSorted: [String] {
         titlesExcludingSelf.sorted { $0.count < $1.count }
     }
+    var titlesSorted: [String] = [] // Use as alternative to titlesNotSelfSorted. Updated by updateTitles().
     var titlesNotSelfSorted: [String] = [] // Pass to WikiEditor. Must be updated, along with selectedTitle.
     func resolveNote(from title: String?) -> Note? {
         guard let title = title else { return nil }
@@ -84,10 +85,14 @@ class WikiModel {
     }
     
     // Called on rename, add, delete
+    // Does not really help.
     func updateTitles() {
         if let records = try? fetchRecords(predicate: #Predicate<Note> { record in true }, sortDescriptors: [SortDescriptor(\.title)]) {
             notes = records
-            titlesNotSelfSorted = titles.sorted()
+            let set = Set(titles) // de-duplicate
+            let titlesSorted  = set.sorted()
+            self.titlesSorted = titlesSorted
+            // titlesNotSelfSorted = titles.sorted() // No, this is titles sorted!
         }
     }
     func exclude(title: String) {

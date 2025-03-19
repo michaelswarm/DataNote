@@ -146,7 +146,7 @@ struct ContentView: View {
 
     private func deleteNotes(offsets: IndexSet) {
         withAnimation {
-            offsets.map { notes[$0] }.forEach(modelContext.delete)
+            offsets.map { notes[$0] }.forEach(modelContext.delete) // How does forEach pass parameter???
             selectedNote = nil
         }
         wiki.updateTitles()
