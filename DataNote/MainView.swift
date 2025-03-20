@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MainView.swift
 //  DataNote
 //
 //  Created by Michael Swarm on 3/13/25.
@@ -9,8 +9,7 @@ import SwiftUI
 import SwiftData
 import WikiEditor
 
-// MainView
-struct ContentView: View {
+struct MainView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var notes: [Note]
     @Binding var selectedNote: Note? // Binding or Bindable???
@@ -22,49 +21,15 @@ struct ContentView: View {
     @State var isExpanded = false
     @State var searchType: SearchType = .title
     @Environment(ExportModel.self) var bulkModel
-    @Environment(WikiModel.self) var wiki // Replace local wiki with app wiki
+    @Environment(CollectionModel.self) var collection // Prototype querry update receiver.
+    @State var count = 0
     
-    // @State var wiki: WikiModel
-    // Wiki Model (depends of query, update? performance-scale?) Can model update be driven by view on change???
-    /*@State var selectedTitle: String?
-    @State var contentSelection: NSRange = NSRange(location: 0,length: 0) // TBD: Optionally used for add title or scroll to content selection...
-    var titles: [String] { notes.map(\.title) }
-    var titlesExcludingSelf: [String] {
-        if let selectedTitle = selectedTitle {
-            var set = Set(titles)
-            if let removed = set.remove(selectedTitle) {
-                return Array(set)
-            } else {
-                return []
-            }
-        } else {
-            return []
-        }
-    }
-    var titlesExcludingSelfSorted: [String] {
-        titlesExcludingSelf.sorted { $0.count < $1.count }
-    }
-    @State var titlesNotSelfSorted: [String] = [] // Pass to WikiEditor. Must be updated, along with selectedTitle.
-    func resolveNote(from title: String?) -> Note? {
-        guard let title = title else { return nil }
-        
-        if let index = notes.firstIndex(where: { $0.title == title }) {
-            let note = notes[index]
-            return note
-        } else {
-            print("ResolveNote: Can not find index...")
-            return nil
-        }
-    }*/
-
     // The sortDescriptor value is passed separately from sortOption binding, so that re-init and re-query whenever sort descriptor changes. A sortOption change just re-calculates the body (sidebar).
     init(sortDescriptor: SortDescriptor<Note>, sortOption: Binding<SortOption>, config: StorageConfiguration, selection: Binding<Note?>, context: ModelContext) {
         self._notes = Query(sort: [sortDescriptor]) // Query with sort descriptor
         self._sortOption = sortOption
         self.config = config
         self._selectedNote = selection
-        
-        // self.wiki = WikiModel(modelContext: context)
     }
 
     var body: some View {
@@ -80,7 +45,12 @@ struct ContentView: View {
                             Text(note.title)
                                 .tag(note)
                         }
-                        .onDelete(perform: deleteNotes) // Does not work with sidebar list style
+                        .onDelete { offsets in // Does not work with sidebar list style
+                            withAnimation {
+                                collection.deleteNotes(offsets: offsets)
+                            }
+                        }
+                        //.onDelete(perform: collection.deleteNotes) // Does not work with sidebar list style
                     } else {
                         if searchType == .title {
                             ForEach(bulkModel.results, id: \.self) { note in
@@ -110,7 +80,7 @@ struct ContentView: View {
             .navigationTitle("Notes")
             .toolbar {
                 ToolbarItemGroup {
-                    Button(action: addNote) {
+                    Button(action: collection.addNote) {
                         Label("Add Note", systemImage: "plus")
                         // Label("Add Note", systemSymbol: .plus)
                     }
@@ -128,35 +98,30 @@ struct ContentView: View {
 #endif
         } detail: {
             if let selectedNote = selectedNote {
-                Detail(wiki: wiki, note: selectedNote, selectedNote: $selectedNote, titlesNotSelfSorted: wiki.titlesNotSelfSorted) // Can even move this up one level, since Detail handles selected note optional. Detail needs to write to selected note.
+                
+                // Passes collection titlesExcludedSelfSorted as parameter.
+                Detail(note: selectedNote, selectedNote: $selectedNote, titlesNotSelfSorted: collection.titlesExcludingSelfShortestFirst) // Can even move this up one level, since Detail handles selected note optional. Detail needs to write to selected note.
                 // NoteDetailView(note: selectedNote)
 
             } else {
                 Text("Select a note")
             }
         }
-    }
-    
-    private func addNote() {
-        let newNote = Note()
-        modelContext.insert(newNote)
-        selectedNote = newNote
-        wiki.updateTitles()
-    }
-
-    private func deleteNotes(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { notes[$0] }.forEach(modelContext.delete) // How does forEach pass parameter???
-            selectedNote = nil
+        .onAppear {
+            print("Content view appear update \(count)...")
+            collection.receiveUpdate(notes: notes) // send update...
         }
-        wiki.updateTitles()
-    }
+        .onChange(of: notes) { newValue, oldValue in
+            print("Content view query update \(count)...")
+            collection.receiveUpdate(notes: notes) // send update...
+        }
+    }    
 }
 
 #Preview {
     @Previewable @State var sortOption = SortOption.titleAZ
     @Previewable @State var config: StorageConfiguration = StorageConfiguration()
     @Previewable @State var selection: Note? = nil
-    let context = ModelContainer.shared.mainContext
-    ContentView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection, context: context)
+    let context = ModelContainer.sharedInMemory.mainContext
+    MainView(sortDescriptor: SortOption.titleAZ.sortDescriptor, sortOption: $sortOption, config: config, selection: $selection, context: context)
 }

@@ -12,44 +12,21 @@ import SwiftData
 struct DataNoteApp: App {
     @State var sortOption: SortOption = .titleAZ
     @State var config = StorageConfiguration()
-    // @State var selection: Note? // Move into wiki model???
+    @State var collection = CollectionModel.shared // State required for binding and environment.
+    //@State var prototype = PrototypeModel.shared // EXPERIMENT
     
-    var modelContext: ModelContext {
-        sharedModelContainer.mainContext
-    }
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Note.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false) // Memory only during development
-        
-        do {
-            let shared = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            
-            // Set TextRecord.titles cache from container at startup. (Necessary for persistence.)
-            /*let descriptor = FetchDescriptor<Note>()
-            let items = try? shared.mainContext.fetch(descriptor)
-            if let items = items {
-                Note.titles = items.map { $0.title }
-            } else {
-                print("Could not read items. Can not set TextRecord.titles")
-            }*/
-            
-            return shared
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
+    // Use lazy init class singleton instead of app property 
+    var context: ModelContext { ModelContainer.shared.mainContext }
+    
     var body: some Scene {
-        let exportModel = ExportModel(modelContext: modelContext) // Create shared model here
-        @Bindable var wiki = WikiModel(modelContext: modelContext) // Has property observer, can still pass as parameter...
+        let exportModel = ExportModel(modelContext: context) // Create shared model here
 
         WindowGroup {
-            ContentView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $wiki.selection, context: modelContext)
+            MainView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $collection.selectedNote, context: context)
                 .modelContainer(for: Note.self)
                 .environment(exportModel) 
-                .environment(wiki)
+                .environment(collection) // Use class singleton instead of pass by environment???
+                //.environment(prototype)
         }
         
 #if os(macOS)
@@ -71,7 +48,7 @@ struct DataNoteApp: App {
                 }
                 Divider() // Separate delete to make it less likely to be accidentally chosen.
                 if config.showDeleteAll {
-                    BulkDeleteView(sharedModel: exportModel, selection: $wiki.selection)
+                    BulkDeleteView(sharedModel: exportModel, selection: $collection.selectedNote)
                     // Pass all bulk storage action models into environment for button enable-disable
                         .environment(exportModel)
                 }

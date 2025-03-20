@@ -10,32 +10,29 @@ import SwiftData
 import WikiEditor
 
 struct Detail: View {
-    @Bindable var wiki: WikiModel
     @Bindable var note: Note
     @Binding var selectedNote: Note?
     let titlesNotSelfSorted: [String]
     
+    @Environment(CollectionModel.self) var collection // Prototype querry update receiver.
+    
     @State var titleEdit: String // View state does not change on change to bindable.
-    init(wiki: WikiModel, note: Note, selectedNote: Binding<Note?>, titlesNotSelfSorted: [String]) {
+    init(note: Note, selectedNote: Binding<Note?>, titlesNotSelfSorted: [String]) {
         print("Detail init...")
-        self.wiki = wiki
         self.note = note
         self._selectedNote = selectedNote
         self.titlesNotSelfSorted = titlesNotSelfSorted // Used as parameter to WikiEditor
         self.titleEdit = note.title
         
-        print("Detail titles count \(titlesNotSelfSorted.count)...")
-        print("Detail wiki titles count \(wiki.titlesNotSelfSorted.count)...")
-        print("Detail wiki titles \(wiki.titles)")
-        
-        // Do not update wiki from within Detail.init, because it causes infinite loop...
-        // self.wiki.exclude(title: note.title) // Recalculates titlesNotSelfSorted to exclude self... (CAUSES CRASH, even if not used)
+        print("Titles (not self) count \(titlesNotSelfSorted.count)...")        
     }
     
     var body: some View {
+        @Bindable var collection = collection
+        
         if let selectedNote = selectedNote {
             
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 TextField("Title", text: $titleEdit)
                     .onSubmit {
                         print("On submit...")
@@ -43,26 +40,25 @@ struct Detail: View {
                         let newTitle = titleEdit
                         selectedNote.title = newTitle
                         selectedNote.modifiedNow() // Update modified with title modification.
-                        wiki.updateTitles() // This should update titles, but not for currrent detail view???
-                        wiki.exclude(title: newTitle)
                     }
-                    .padding(.horizontal, 2) // Horizontal padding to match TextEditor internal horizontal padding for visual space.
+                    //.padding(.horizontal, 2) // Horizontal padding to match TextEditor internal horizontal padding for visual space.
                 
                 let noteContent = Binding(
                     get: { selectedNote.content },
                     set: { selectedNote.update(keyPath: \.content, to: $0) }
                 )
-                WikiEditor(text: noteContent, title: $wiki.selectedTitle, titlesShortestFirstExcludingSelf: titlesNotSelfSorted, selection: $wiki.contentSelection)
-                // Calculate because of link
-                // Actually triggers every time, after note selection too.
-                    .onChange(of: wiki.selectedTitle) { oldValue, newValue in
-                        print("On link change selected title...") // Avoid trigger based on changes to note content.
-                        self.selectedNote = wiki.resolveNote(from: newValue) // After update, before value changes.
-                    }
+                // Collection model
+                WikiEditor(text: noteContent, title: $collection.selectedTitle, titlesShortestFirstExcludingSelf: titlesNotSelfSorted, selection: $collection.contentSelection)
+                
                     .onChange(of: selectedNote.content) {
                         selectedNote.modifiedNow() // Update modified with content modification.
                     }
-                
+                /* Wiki title links debug: May want to add index and history too...
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Titles \(collection.titles.count) \(collection.titles)") // sort according to sidebar setting
+                    Text("Short First Not Self \(collection.titlesExcludingSelfShortestFirst.count) \(collection.titlesExcludingSelfShortestFirst)")
+                }
+                .padding(4)*/
                 HStack {
                     Text("Created at \(note.created.formatted())")
                     Spacer()

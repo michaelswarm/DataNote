@@ -5,7 +5,7 @@
 //  Created by Michael Swarm on 3/17/25.
 //
 
-import Foundation
+/*import Foundation
 import SwiftData
 
 @Observable
@@ -43,7 +43,7 @@ class WikiModel {
         didSet {
             if let selectedTitle = selectedTitle {
                 print("UPDATE SELECTED TITLE \(selectedTitle)...")
-                /*titlesNotSelfSorted = titlesExcludingSelfSorted // calculates titles excluding self (not self), then sorts
+                /*titlesNotSelfSorted = titlesExcludingSelfShortestFirst // calculates titles excluding self (not self), then sorts
                 if titlesNotSelfSorted.contains(selectedTitle) {
                     print("ERROR: DID NOT CALCULATE CORRECTLY!!!...")
                 }*/
@@ -109,4 +109,4 @@ class WikiModel {
             print("Not found \(title) in titles...")
         }
     }
-}
+}*/
