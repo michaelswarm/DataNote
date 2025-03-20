@@ -35,9 +35,23 @@
 		88513CAA2D834D100079EDA9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		88513EBB2D8CD9940079EDA9 /* Exceptions for "DataNote" folder in "DataNote" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"PrototypeModel-NOT USED.swift",
+				"WikiModel-NOT USED.swift",
+			);
+			target = 88513C772D833DD70079EDA9 /* DataNote */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		88513C7A2D833DD70079EDA9 /* DataNote */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				88513EBB2D8CD9940079EDA9 /* Exceptions for "DataNote" folder in "DataNote" target */,
+			);
 			path = DataNote;
 			sourceTree = "<group>";
 		};

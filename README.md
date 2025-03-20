@@ -21,4 +21,4 @@ https://plaintexttools.substack.com/p/sample-swiftdata-notes-app
 - 0.2.0: 425 lines of code, in 8 source files
 - 0.3.0: 1125 lines of code, in 15 source files
 - 0.4.0: 1518 lines of code, in 18 source files
-- 0.5.0: 1725 lines of code, in 21 source files
+- 0.5.0: 1775 lines of code, in 21 source files
