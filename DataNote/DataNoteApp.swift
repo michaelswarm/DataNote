@@ -16,15 +16,15 @@ struct DataNoteApp: App {
     //@State var prototype = PrototypeModel.shared // EXPERIMENT
     
     // Use lazy init class singleton instead of app property 
-    var context: ModelContext { ModelContainer.shared.mainContext }
+    // var context: ModelContext { ModelContainer.shared.mainContext }
     
     var body: some Scene {
-        let exportModel = ExportModel(modelContext: context) // Create shared model here
+        //let exportModel = ExportModel(modelContext: context) // Create shared model here
 
         WindowGroup {
-            MainView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $collection.selectedNote, context: context)
+            MainView(sortDescriptor: sortOption.sortDescriptor, sortOption: $sortOption, config: config, selection: $collection.selectedNote /*, context: context*/) // Why is context passed???
                 .modelContainer(for: Note.self)
-                .environment(exportModel) 
+                //.environment(exportModel)
                 .environment(collection) // Use class singleton instead of pass by environment???
                 //.environment(prototype)
         }
@@ -37,20 +37,26 @@ struct DataNoteApp: App {
                     /*if exportModel.isRunning  { // No way to tell which process is running???
                         ProgressBar(progress: exportModel.progress) // Need binding here, which BulkImportView helps create.
                     }*/
-                    BulkImportView(sharedModel: exportModel)
+                    BulkImportView()
+                    // BulkImportView(sharedModel: exportModel)
                     // Pass all bulk storage action models into environment for button enable-disable
-                        .environment(exportModel)
+                        //.environment(exportModel)
+                        .environment(collection)
                 }
                 if config.showExportAll {
-                    BulkExportView(sharedModel: exportModel) // Pass into file menu item button
+                    BulkExportView()
+                    //BulkExportView(sharedModel: exportModel) // Pass into file menu item button
                     // Pass all bulk storage action models into environment for button enable-disable
-                        .environment(exportModel)
+                        //.environment(exportModel)
+                        .environment(collection)
                 }
                 Divider() // Separate delete to make it less likely to be accidentally chosen.
                 if config.showDeleteAll {
-                    BulkDeleteView(sharedModel: exportModel, selection: $collection.selectedNote)
+                    BulkDeleteView(selection: $collection.selectedNote)
+                        .environment(collection)
+                    //BulkDeleteView(sharedModel: exportModel, selection: $collection.selectedNote)
                     // Pass all bulk storage action models into environment for button enable-disable
-                        .environment(exportModel)
+                        //.environment(exportModel)
                 }
             }
         }

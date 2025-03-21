@@ -14,22 +14,25 @@ struct ActionBar: View {
     @Binding var selection: Note?
     @State var showSettings = false
     
-    @Environment(ExportModel.self) var exportModel
+    //@Environment(ExportModel.self) var exportModel
+    @Environment(CollectionModel.self) var collection
 
 
     var body: some View {
-        @Bindable var exportModel = exportModel
+        //@Bindable var exportModel = exportModel
+        @Bindable var collection = collection
 
         VStack {
             // OperationBar???
-            if exportModel.isRunning {
-                ProgressBar(progress: $exportModel.progress) // ProgressView + ProgressModel wrapper
+            if collection.isRunning {
+            //if exportModel.isRunning {
+                ProgressBar(progress: $collection.progress) // ProgressView + ProgressModel wrapper
+                //ProgressBar(progress: $exportModel.progress) // ProgressView + ProgressModel wrapper
                     .labelStyle(.iconOnly)
                     //.buttonStyle(.accessoryBar)
                     .padding(.vertical, 4)
                     .padding(.horizontal, 8)
             }
-            // Missing progress bar for import-export-delete???
 
             // ActionBar
             HStack {
@@ -59,19 +62,23 @@ struct ActionBar: View {
                 Spacer()
                 
                 if config.showExportAll {
-                    BulkExportView(sharedModel: exportModel) // ExportProgressView???
+                    BulkExportView()
+                    // BulkExportView(sharedModel: collection) // ExportProgressView???
+                    // BulkExportView(sharedModel: exportModel) // ExportProgressView???
                     //.buttonStyle(.accessoryBar)
                         //.padding(.vertical, 4)
                         //.padding(.horizontal, 8)
                 }
                 if config.showImportAll {
-                    BulkImportView(sharedModel: exportModel) // ExportProgressView???
+                    BulkImportView()
+                    //BulkImportView(sharedModel: exportModel) // ExportProgressView???
                     //.buttonStyle(.accessoryBar)
                         //.padding(.vertical, 4)
                         //.padding(.horizontal, 8)
                 }
                 if config.showDeleteAll {
-                    BulkDeleteView(sharedModel: exportModel, selection: $selection) // ExportProgressView???
+                    BulkDeleteView(selection: $selection)
+                    //BulkDeleteView(sharedModel: exportModel, selection: $selection) // ExportProgressView???
                     //.buttonStyle(.accessoryBar)
                         //.padding(.vertical, 4)
                         //.padding(.horizontal, 8)

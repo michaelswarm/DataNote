@@ -11,15 +11,14 @@ import UniformTypeIdentifiers
 
 struct BulkExportView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(ExportModel.self) var exportModel // If environment, then why init parameter???
-    //@Environment(ImportModel.self) var importModel
-    //@Environment(DeleteModel.self) var deleteModel
+    //@Environment(ExportModel.self) var exportModel // If environment, then why init parameter???
+    @Environment(CollectionModel.self) var collection
     @State private var isShowingFolderPicker = false
     
-    @Bindable var shared: ExportModel // TBD: Get BulkExportView to use shared model, not view state.
-    init(sharedModel: ExportModel) {
+    //@Bindable var shared: ExportModel // TBD: Get BulkExportView to use shared model, not view state.
+    /*init(sharedModel: ExportModel) {
         self.shared = sharedModel
-    }
+    }*/
     
     var body: some View {
         //VStack {
@@ -31,7 +30,8 @@ struct BulkExportView: View {
                 } label: {
                     Label("Export All", systemImage: "square.and.arrow.up.on.square")
                 }
-                .disabled(exportModel.isRunning)
+                .disabled(collection.isRunning)
+                //.disabled(exportModel.isRunning)
                 // File importer is used as folder picker for user to select a destination folder to export to.
                 .fileImporter( isPresented: $isShowingFolderPicker, allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
                     print("Folder Picker...")
@@ -39,7 +39,8 @@ struct BulkExportView: View {
                         let urls = try result.get()
                         let folderURL = urls.first!
                         Task {
-                            await shared.exportAllFiles(to: folderURL)
+                            await collection.exportAllFiles(to: folderURL)
+                            //await shared.exportAllFiles(to: folderURL)
                         }
                     }
                     catch{
@@ -57,7 +58,7 @@ struct BulkExportView: View {
 
 // Can not show file picker in preview. 
 #Preview {
-    var sharedModelContainer: ModelContainer = {
+    /*var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Note.self,
         ])
@@ -70,6 +71,7 @@ struct BulkExportView: View {
         }
     }()
 
-    let shared = ExportModel(modelContext: sharedModelContainer.mainContext)
-    BulkExportView(sharedModel: shared)
+    let shared = ExportModel(modelContext: sharedModelContainer.mainContext)*/
+    BulkExportView()
+    // BulkExportView(sharedModel: shared)
 }

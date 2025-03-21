@@ -15,15 +15,16 @@ import Foundation
 // Same for BulkExportView...
 struct BulkImportView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(ExportModel.self) var exportModel
+    //@Environment(ExportModel.self) var exportModel
+    @Environment(CollectionModel.self) var collection
     //@Environment(ImportModel.self) var importModel
     //@Environment(DeleteModel.self) var deleteModel
     @State private var isShowingFolderPicker = false
     
-    @Bindable var shared: ExportModel // TBD: Get BulkExportView to use shared model, not view state.
+    /*@Bindable var shared: ExportModel // TBD: Get BulkExportView to use shared model, not view state.
     init(sharedModel: ExportModel) {
         self.shared = sharedModel
-    }
+    }*/
 
     var body: some View {
         /*if shared.isRunning {
@@ -34,7 +35,8 @@ struct BulkImportView: View {
             } label: {
                 Label("Import All", systemImage: "square.and.arrow.down.on.square")
             }
-            .disabled(exportModel.isRunning)
+            .disabled(collection.isRunning)
+            //.disabled(exportModel.isRunning)
             .fileImporter(
                 isPresented: $isShowingFolderPicker,
                 allowedContentTypes: [.folder],
@@ -44,7 +46,8 @@ struct BulkImportView: View {
                 case .success(let urls):
                     if let folderURL = urls.first {
                         Task {
-                            await shared.importAllFiles(from: folderURL)
+                            await collection.importAllFiles(from: folderURL)
+                            //await shared.importAllFiles(from: folderURL)
                         }
                     }
                 case .failure(let error):
@@ -57,7 +60,7 @@ struct BulkImportView: View {
 }
 
 #Preview {
-    var sharedModelContainer: ModelContainer = {
+    /*var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Note.self,
         ])
@@ -71,5 +74,6 @@ struct BulkImportView: View {
     }()
 
     let shared = ExportModel(modelContext: sharedModelContainer.mainContext)
-    BulkImportView(sharedModel: shared)
+    BulkImportView(sharedModel: shared)*/
+    BulkImportView()
 }

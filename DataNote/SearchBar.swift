@@ -17,7 +17,8 @@ struct SearchBar: View {
     @Binding var searchText: String // = ""
     @Binding var searchType: SearchType // = .title
     @Environment(\.modelContext) private var modelContext
-    @Environment(ExportModel.self) var bulkModel
+    //@Environment(ExportModel.self) var bulkModel
+    @Environment(CollectionModel.self) var collection
     
     private var didSavePublisher: NotificationCenter.Publisher { // Use to refresh search results?
         NotificationCenter.default
@@ -30,16 +31,19 @@ struct SearchBar: View {
                 switch searchType {
                 case .title:
                     Task {
-                        await bulkModel.searchAllNotes(titleText: searchText)
+                        await collection.searchAllNotes(titleText: searchText)
+                        //await bulkModel.searchAllNotes(titleText: searchText)
                     }
                 case .content:
                     Task {
-                        await bulkModel.searchAllNotes(contentText: searchText)
+                        await collection.searchAllNotes(contentText: searchText)
+                        //await bulkModel.searchAllNotes(contentText: searchText)
                     }
                 }
             }, cancelAction: {
                 searchText = ""
-                bulkModel.results = []
+                collection.results = []
+                //bulkModel.results = []
             })
             .onReceive(didSavePublisher) { _ in
                 print("OnReceive didSavePublisher...")
@@ -48,11 +52,13 @@ struct SearchBar: View {
                     switch searchType {
                     case .title:
                         Task {
-                            await bulkModel.searchAllNotes(titleText: searchText)
+                            await collection.searchAllNotes(titleText: searchText)
+                            //await bulkModel.searchAllNotes(titleText: searchText)
                         }
                     case .content:
                         Task {
-                            await bulkModel.searchAllNotes(contentText: searchText)
+                            await collection.searchAllNotes(contentText: searchText)
+                            //await bulkModel.searchAllNotes(contentText: searchText)
                         }
                     }
                 }
