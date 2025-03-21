@@ -16,13 +16,12 @@ struct SearchBar: View {
     @Binding var isExpanded: Bool // = false
     @Binding var searchText: String // = ""
     @Binding var searchType: SearchType // = .title
-    @Environment(\.modelContext) private var modelContext
-    //@Environment(ExportModel.self) var bulkModel
+    //@Environment(\.modelContext) private var modelContext
     @Environment(CollectionModel.self) var collection
     
     private var didSavePublisher: NotificationCenter.Publisher { // Use to refresh search results?
         NotificationCenter.default
-            .publisher(for: ModelContext.willSave, object: modelContext)
+            .publisher(for: ModelContext.willSave, object: ModelContainer.shared.mainContext)
     }
 
     var body: some View {
@@ -32,18 +31,15 @@ struct SearchBar: View {
                 case .title:
                     Task {
                         await collection.searchAllNotes(titleText: searchText)
-                        //await bulkModel.searchAllNotes(titleText: searchText)
                     }
                 case .content:
                     Task {
                         await collection.searchAllNotes(contentText: searchText)
-                        //await bulkModel.searchAllNotes(contentText: searchText)
                     }
                 }
             }, cancelAction: {
                 searchText = ""
                 collection.results = []
-                //bulkModel.results = []
             })
             .onReceive(didSavePublisher) { _ in
                 print("OnReceive didSavePublisher...")
@@ -53,12 +49,10 @@ struct SearchBar: View {
                     case .title:
                         Task {
                             await collection.searchAllNotes(titleText: searchText)
-                            //await bulkModel.searchAllNotes(titleText: searchText)
                         }
                     case .content:
                         Task {
                             await collection.searchAllNotes(contentText: searchText)
-                            //await bulkModel.searchAllNotes(contentText: searchText)
                         }
                     }
                 }

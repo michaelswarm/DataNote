@@ -4,7 +4,7 @@
 //
 //  Created by Michael Swarm on 3/13/25.
 //
-
+/*
 import Foundation
 import SwiftUI
 import SwiftData
@@ -60,3 +60,4 @@ struct NoteDetailView: View {
         .navigationTitle("Note Details")
     }
 }
+*/

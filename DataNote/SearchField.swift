@@ -52,9 +52,6 @@ struct SearchField: View {
                 // Submit action and environment makes non-reusable. Use submit action parameter instead???
                 .onSubmit {
                     submitAction()
-                    /*Task {
-                        await contentSearchModel.searchAllNotes()
-                    }*/
                 }
                 .onKeyPress(keys: [.escape]) { press in // 2024-IOS17-MacOS14
                     // print("Received \(press.characters)")

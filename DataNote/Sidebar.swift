@@ -16,17 +16,17 @@ struct SearchViewModel {
 }
 
 struct Sidebar: View {
+    let notes: [Note] // = []
     @Binding var selectedNote: Note? // Binding or Bindable???
+    // Pass to settings in action bar 
     @Binding var sortOption: SortOption
     @Bindable var config: StorageConfiguration // = StorageConfiguration()
-    var notes: [Note] = [] // This does not work! 
     
     // Search State (Separate search view model? Or do separate parameters make view more flexible?)
     @State var search = SearchViewModel()
     @State var searchText = ""
     @State var isExpanded = false
     @State var searchType: SearchType = .title
-    //@Environment(ExportModel.self) var bulkModel
     @Environment(CollectionModel.self) var collection // Prototype querry update receiver.
     @State var count = 0
     
@@ -50,13 +50,11 @@ struct Sidebar: View {
                 } else {
                     if searchType == .title {
                         ForEach(collection.results, id: \.self) { note in
-                        //ForEach(bulkModel.results, id: \.self) { note in
                             Text(note.title)
                                 .tag(note)
                         }
                     } else if searchType == .content {
                         ForEach(collection.results, id: \.self) { note in
-                        //ForEach(bulkModel.results, id: \.self) { note in
                             Text(note.title)
                                 .tag(note)
                         }
@@ -64,15 +62,13 @@ struct Sidebar: View {
                 }
             }
             // Calculate because of note selection
-                .onChange(of: selectedNote) { oldValue, newValue in
+                /*.onChange(of: selectedNote) { oldValue, newValue in
                     print("List on change selected note...") // Avoid trigger based on changes to note content???
-                    // wiki.contentSelection = NSRange(location: 0, length: 0) // Start edit at top, not bottom.
-                }
+                    // Now handled by main model property observer
+                }*/
             
             // count needs to adjust
             ActionBar(sortOption: $sortOption, config: config, count: searchText.isEmpty ? notes.count : collection.results.count, selection: $selectedNote)
-
-            //ActionBar(sortOption: $sortOption, config: config, count: searchText.isEmpty ? notes.count : bulkModel.results.count, selection: $selectedNote)
                 .padding(.top, 2)
                 .padding(.bottom, 4)
                 .padding(.horizontal, 8)
@@ -82,7 +78,6 @@ struct Sidebar: View {
             ToolbarItemGroup {
                 Button(action: collection.addNote) {
                     Label("Add Note", systemImage: "plus")
-                    // Label("Add Note", systemSymbol: .plus)
                 }
                 Spacer()
                 Button {

@@ -67,8 +67,8 @@ class CollectionModel {
         count = count + 1
         
         /* not used - optimization
-        titlesCache = titles
-        titlesNotSelfSortedCache = titlesExcludingSelfShortestFirst*/
+         titlesCache = titles
+         titlesNotSelfSortedCache = titlesExcludingSelfShortestFirst*/
     }
     var context: ModelContext {
         ModelContainer.shared.mainContext
@@ -96,7 +96,7 @@ class CollectionModel {
         selectedNote = newNote // select after insert
         //wiki.updateTitles()
     }
-
+    
     func deleteNotes(offsets: IndexSet) {
         offsets.map { notes[$0] }
             .forEach { note in
@@ -109,10 +109,7 @@ class CollectionModel {
         //wiki.updateTitles()
     }
     
-    // MARK: Lazy Init Singleton
-    static var shared: CollectionModel = { return CollectionModel() }()
-
-    // MARK: Wiki Model
+    // MARK: Wiki
     var selectedTitle: String? {
         didSet {
             if selectedTitle != oldValue {
@@ -121,9 +118,21 @@ class CollectionModel {
             contentSelection = NSRange(location: 0,length: 0)
         }
     }
-    
     var contentSelection: NSRange = NSRange(location: 0,length: 0) // TBD: Optionally used for add title or scroll to content selection...
+
+    // MARK: Bulk Operations
+    var isRunning = false
+    var progress = ProgressModel() // Display by ProgressView
     
+    // MARK: SEARCH
+    var results: [Note] = []
+    
+    // MARK: Lazy Init Singleton
+    static var shared: CollectionModel = { return CollectionModel() }()
+}
+
+extension CollectionModel {
+    // MARK: Wiki
     // Calculated Values
     // Up to client views to pull and re-calculate titles.
     var titles: [String] { notes.map(\.title) } // more stable than titlesExcludingSelf, only changes on add, delete and rename
@@ -155,23 +164,21 @@ class CollectionModel {
             return nil
         }
     }
+    
+    /* not used - optimization
+     // Cached Values (optimization, avoid calculation each time needed)
+     // Not every update may require re-calculation of titles. Only add, delete and rename. Not content or attribute changes.
+     var titlesCache: [String] = [] // more stable
+     var titlesNotSelfSortedCache: [String] = [] // less stable
+     
+     func updateTitles() {
+     titlesCache = titles
+     titlesNotSelfSortedCache = titlesExcludingSelfShortestFirst
+     }*/
+}
 
-    /* not used - optimization 
-    // Cached Values (optimization, avoid calculation each time needed)
-    // Not every update may require re-calculation of titles. Only add, delete and rename. Not content or attribute changes.
-    var titlesCache: [String] = [] // more stable
-    var titlesNotSelfSortedCache: [String] = [] // less stable
-    
-    func updateTitles() {
-        titlesCache = titles
-        titlesNotSelfSortedCache = titlesExcludingSelfShortestFirst
-    }*/
-    
-    // MARK: BULK OPERATIONS (COPY FROM EXPORT MODEL) 
-    
-    var isRunning = false
-    var progress = ProgressModel() // Display by ProgressView
-
+extension CollectionModel {
+    // MARK: BULK OPERATIONS
     // Function to fetch data (same for export model and import model)
     func fetchRecords(predicate: Predicate<Note>? = nil, sortDescriptors: [SortDescriptor<Note>]) throws -> [Note] {
         let fetchDescriptor = FetchDescriptor<Note>(predicate: predicate, sortBy: sortDescriptors)
@@ -179,7 +186,6 @@ class CollectionModel {
     }
     
     // MARK: IMPORT
-    
     // JUST USE EXISTING QUERY NOTES, OR RE-FETCH???
     func exportAllFiles(to folderURL: URL) async {
         print("ExportAllFiles from \(folderURL.absoluteString)...")
@@ -240,7 +246,6 @@ class CollectionModel {
     }
 
     // MARK: EXPORT
-    
     func getFileDates(from fileURL: URL) -> (creationDate: Date?, modificationDate: Date?) {
         let fileManager = FileManager.default
         
@@ -350,9 +355,6 @@ class CollectionModel {
     }
     
     // MARK: SEARCH
-    // var searchText: String = ""
-    var results: [Note] = []
-    
     func searchAllNotes(titleText searchText: String) async {
         print("SearchAllNotes for \(searchText)...")
                 results = []
